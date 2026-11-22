@@ -458,15 +458,15 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 10px;
+  gap: 8px 11px;
   margin-bottom: 26px;
   color: var(--hero-muted);
-  font-size: 0.92rem;
+  font-size: 1.02rem;
 }
 
 .rec-dot {
-  width: 9px;
-  height: 9px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   background: var(--accent);
   animation: blink 1.6s steps(2, start) infinite;
@@ -481,7 +481,7 @@ h3 {
 .rec-text,
 .timecode {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: 0.91rem;
   letter-spacing: 0.1em;
 }
 
@@ -490,7 +490,7 @@ h3 {
 }
 
 .rec-sep {
-  width: 22px;
+  width: 25px;
   height: 1px;
   background: var(--hero-line);
 }
@@ -498,6 +498,28 @@ h3 {
 .rec-kind {
   color: var(--hero-fg);
   font-weight: 500;
+}
+
+/* 폭이 좁은 휴대폰(360px 등)에서는 이 줄이 두 줄로 넘어가지 않게 한 단계만 키운다 */
+@media (max-width: 400px) {
+  .rec-line {
+    gap: 8px 10px;
+    font-size: 0.97rem;
+  }
+
+  .rec-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .rec-text,
+  .timecode {
+    font-size: 0.86rem;
+  }
+
+  .rec-sep {
+    width: 22px;
+  }
 }
 
 h1 {
