@@ -629,6 +629,15 @@ h1 {
   transform: translateY(-6px);
 }
 
+/* 양쪽 카드도 기울기와 자리는 그대로 두고 가운데와 같은 만큼 떠오른다 */
+.phone:nth-child(1):hover {
+  transform: translateX(16%) translateY(-6px) rotate(-7deg);
+}
+
+.phone:nth-child(3):hover {
+  transform: translateX(-16%) translateY(-6px) rotate(7deg);
+}
+
 .phone-blur {
   position: absolute;
   inset: -14%;
