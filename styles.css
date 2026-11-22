@@ -1359,6 +1359,78 @@ textarea:focus-visible {
   text-underline-offset: 3px;
 }
 
+/* ---------- 재생 창 (인스타그램 재생 화면을 페이지 안에 띄운다) ---------- */
+
+.player {
+  /* 화면이 낮으면 폭을 줄여서 머리줄과 영상 칸이 스크롤 없이 한눈에 들어오게 한다(영상 칸 높이는 폭의 1.25배) */
+  width: min(400px, calc(100% - 24px), max(326px, calc((100dvh - 150px) / 1.25)));
+  max-width: calc(100% - 24px);
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #1b1612;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.player[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.player::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.player-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px 8px 16px;
+  border-bottom: 1px solid rgba(27, 22, 18, 0.14);
+}
+
+.player-head h2 {
+  font-size: 1.05rem;
+}
+
+.player-head .round-btn {
+  width: 40px;
+  height: 40px;
+  border-color: rgba(27, 22, 18, 0.14);
+  background: #ffffff;
+  color: #1b1612;
+}
+
+.player-body {
+  position: relative;
+  min-height: 240px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* 재생 화면이 뜨기 전까지 보이는 글 */
+.player-body::before {
+  content: '영상을 불러오는 중입니다';
+  position: absolute;
+  inset: 0 0 auto;
+  padding-top: 110px;
+  color: #675c51;
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+.player-body iframe {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 708px;
+  border: 0;
+}
+
 /* ---------- 개인정보처리방침 창 ---------- */
 
 .policy {

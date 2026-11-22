@@ -1,4 +1,4 @@
-// 하트레코드 사이트의 동작: 인스타그램 게시물 띠, 첫 화면의 녹화 시간, 상담 신청 폼, 개인정보처리방침 창.
+// 하트레코드 사이트의 동작: 인스타그램 게시물 띠와 재생 창, 첫 화면의 녹화 시간, 상담 신청 폼, 개인정보처리방침 창.
 (() => {
   'use strict';
 
@@ -19,6 +19,7 @@
   const ICON = {
     reel: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.8v6.4l5.4-3.2z" fill="currentColor"/></svg>',
     out: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 5v14L19 12z" fill="currentColor"/></svg>',
   };
 
   const el = (tag, className, text) => {
@@ -43,6 +44,63 @@
   const profileLink = document.getElementById('insta-profile');
   if (profileLink && feed.profile) profileLink.href = feed.profile;
 
+  // 재생 창: 게시물 카드를 누르면 인스타그램으로 넘어가지 않고, 인스타그램이 주는 재생 화면(게시물 주소/embed)을 이 페이지 안에 띄운다.
+  // 재생 화면은 카드를 누를 때 처음 불러오고 창을 닫으면 없앤다(소리가 멎고, 누르기 전에는 인스타그램에 연결되지 않는다).
+  const player = document.getElementById('player');
+  const playerBody = document.getElementById('player-body');
+  const canPlayHere = Boolean(player && playerBody && typeof player.showModal === 'function');
+  let playerFrame = null;
+
+  const openPlayer = (post) => {
+    playerBody.textContent = '';
+    const frame = el('iframe');
+    frame.src = `${post.link.replace(/\/+$/, '')}/embed`;
+    frame.title = `인스타그램 릴스 ${post.caption || ''}`.trim();
+    frame.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
+    frame.setAttribute('allowfullscreen', '');
+    frame.setAttribute('scrolling', 'no');
+    playerBody.append(frame);
+    playerFrame = frame;
+    player.showModal();
+    // 재생 화면의 높이: 머리 54 + 영상 칸(폭의 1.25배) + 아래 줄 154. 불러온 뒤에는 인스타그램이 알려 주는 높이로 맞춘다
+    frame.style.height = `${Math.round(208 + frame.clientWidth * 1.25)}px`;
+  };
+
+  if (canPlayHere) {
+    window.addEventListener('message', (event) => {
+      if (!playerFrame || event.source !== playerFrame.contentWindow || event.origin !== 'https://www.instagram.com') return;
+      let data = event.data;
+      if (typeof data === 'string') {
+        try {
+          data = JSON.parse(data);
+        } catch {
+          return;
+        }
+      }
+      const height = data && data.type === 'MEASURE' && data.details ? Number(data.details.height) : 0;
+      if (height > 200 && height < 3000) playerFrame.style.height = `${Math.ceil(height)}px`;
+    });
+    player.addEventListener('close', () => {
+      playerBody.textContent = '';
+      playerFrame = null;
+    });
+    player.querySelector('[data-close-player]')?.addEventListener('click', () => player.close());
+    // 창 바깥(어두운 부분)을 누르면 닫는다
+    player.addEventListener('click', (event) => {
+      if (event.target === player) player.close();
+    });
+  }
+
+  const playOnClick = (card, post) => {
+    if (!canPlayHere) return;
+    card.addEventListener('click', (event) => {
+      // 새 탭으로 열려는 누름(Ctrl·Shift·⌘를 같이 누름)은 그대로 인스타그램으로 보낸다
+      if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      openPlayer(post);
+    });
+  };
+
   // 첫 화면의 세로 영상 세 장: 왼쪽·가운데·오른쪽 순서로 놓고 가운데에 가장 최근 게시물을 둔다
   const heroReels = document.getElementById('hero-reels');
   if (heroReels) {
@@ -52,7 +110,8 @@
       card.href = post.link;
       card.target = '_blank';
       card.rel = 'noopener';
-      card.setAttribute('aria-label', `인스타그램에서 영상 보기: ${post.caption || ''}`.trim());
+      card.setAttribute('aria-label', `영상 보기: ${post.caption || ''}`.trim());
+      playOnClick(card, post);
 
       const blur = el('img', 'phone-blur');
       blur.src = post.image;
@@ -98,9 +157,10 @@
       thumb.append(img, badge);
 
       const more = el('span', 'reel-more', '릴스 보기');
-      more.insertAdjacentHTML('beforeend', ICON.out);
+      more.insertAdjacentHTML('beforeend', canPlayHere ? ICON.play : ICON.out);
 
       card.append(thumb, el('span', 'reel-caption', post.caption || ''), more);
+      playOnClick(card, post);
       track.append(card);
     }
 
