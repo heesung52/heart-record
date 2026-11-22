@@ -153,6 +153,60 @@
     if (!order.length) heroReels.hidden = true;
   }
 
+  // 점검 화면: 주소 뒤에 ?check 를 붙였을 때만 뜬다.
+  // 실제 휴대폰에서 카드가 떠오르는지 여기서는 볼 수 없어서, 휴대폰이 받은 파일의 판과 카드를 누를 때 일어나는 일을 화면 아래에 적어 준다.
+  // 점검 중에는 카드를 눌러도 인스타그램으로 넘어가지 않는다. 원인을 찾으면 이 토막과 styles.css 의 .check-panel 을 지운다.
+  if (params.has('check') && heroReels && !heroReels.hidden) {
+    const cards = [...heroReels.querySelectorAll('.phone')];
+    const names = ['왼쪽', '가운데', '오른쪽'];
+    const panel = el('div', 'check-panel');
+    const head = el('p');
+    const log = el('ol');
+    panel.append(head, log);
+    document.body.append(panel);
+
+    const version = (url) => (url && url.split('?v=')[1]) || '없음';
+    const offset = (card) => card.getBoundingClientRect().top - heroReels.getBoundingClientRect().top;
+    const base = cards.map(offset);
+    const ua = navigator.userAgent;
+    const browser = (ua.match(/SamsungBrowser\/\d+|KAKAOTALK|NAVER|Whale\/\d+|CriOS\/\d+|FxiOS\/\d+|EdgA?\/\d+|Chrome\/\d+|Version\/\d+/g) || ['모름']).join(' ');
+    head.textContent = [
+      '점검',
+      `동작 ${version(document.querySelector('script[src*="main.js"]')?.src)}`,
+      `모양 ${version(document.querySelector('link[rel="stylesheet"][href*="styles.css"]')?.href)}`,
+      `폭 ${window.innerWidth}`,
+      `터치 ${navigator.maxTouchPoints}`,
+      `마우스 기기 ${mouseDevice ? '예' : '아니오'}`,
+      browser,
+    ].join(' · ');
+
+    const write = (text) => {
+      log.prepend(el('li', '', text));
+      while (log.children.length > 10) log.lastChild.remove();
+    };
+    // 한 줄에: 어느 카드, 언제, 누름 표시(is-pressed)가 붙었는지, :hover 인지, 실제로 올라온 높이
+    const report = (i, when) => {
+      const card = cards[i];
+      write(`${names[i]} ${when} 표시${card.classList.contains('is-pressed') ? 'O' : 'X'} hover${card.matches(':hover') ? 'O' : 'X'} ${(base[i] - offset(card)).toFixed(1)}px`);
+    };
+    cards.forEach((card, i) => {
+      card.addEventListener('pointerdown', (event) => {
+        window.setTimeout(() => report(i, `누르는 중(${event.pointerType})`), 250);
+      });
+      card.addEventListener('pointercancel', () => write(`${names[i]} 누름이 취소됨`));
+      card.addEventListener(
+        'click',
+        (event) => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          window.setTimeout(() => report(i, '뗀 뒤'), 600);
+        },
+        true,
+      );
+    });
+    write('카드 세 장을 한 번씩 꾹 눌렀다 떼어 보세요');
+  }
+
   // 가 방식: 게시물 목록으로 직접 그리는 띠
   const carousel = document.getElementById('reel-carousel');
   const track = document.getElementById('reel-track');
