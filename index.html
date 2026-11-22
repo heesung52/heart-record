@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="styles.css?v=32e6d43d">
+<link rel="stylesheet" href="styles.css?v=faaf5dbd">
 </head>
 <body>
 <a class="skip" href="#main">본문으로 건너뛰기</a>
@@ -58,7 +58,13 @@
         <div><dt>촬영 지역</dt><dd>세종 중심 · 전국</dd></div>
       </dl>
     </div>
-    <div class="hero-reels" id="hero-reels" aria-label="최근 작업물"></div>
+    <div class="hero-visual">
+      <button type="button" class="logo-screen" id="logo-screen" aria-label="하트레코드 로고 영상 다시 보기">
+        <video id="logo-video" muted playsinline preload="auto" src="assets/logo/logo-glass.mp4"></video>
+        <img id="logo-still" src="assets/logo/logo-glass.jpg" alt="" hidden>
+      </button>
+      <div class="hero-reels" id="hero-reels" aria-label="최근 작업물"></div>
+    </div>
   </div>
 </section>
 
@@ -320,6 +326,6 @@
 </dialog>
 
 <script src="data/instagram.js?v=b9aa6e90"></script>
-<script src="main.js?v=719c468d"></script>
+<script src="main.js?v=3a714136"></script>
 </body>
 </html>

@@ -153,6 +153,42 @@
     if (!order.length) heroReels.hidden = true;
   }
 
+  // 첫 화면의 유리 로고 영상(세로 영상 세 장의 위). 처음에는 빈 바탕이고, 화면에 보이면 한 번 재생해 로고가 떠오른 뒤 마지막 장면에서 멈춘다. 누르면 다시 재생한다.
+  // 움직임 줄이기를 켠 기기에서는 재생하지 않고 마지막 장면 그림만 보여 준다.
+  const logoScreen = document.getElementById('logo-screen');
+  const logoVideo = document.getElementById('logo-video');
+  const logoStill = document.getElementById('logo-still');
+  if (logoScreen && logoVideo) {
+    if (reduceMotion) {
+      logoVideo.hidden = true;
+      if (logoStill) logoStill.hidden = false;
+    } else {
+      // 재생이 막힌 기기(절전 모드 등)에서는 빈 바탕만 남으므로 마지막 장면 그림으로 바꾼다
+      const showStill = () => {
+        logoVideo.hidden = true;
+        if (logoStill) logoStill.hidden = false;
+      };
+      const playLogo = () => {
+        if (logoVideo.hidden) return;
+        logoVideo.currentTime = 0;
+        logoVideo.play().catch(showStill);
+      };
+      logoVideo.addEventListener('error', showStill);
+      if ('IntersectionObserver' in window) {
+        const seen = new IntersectionObserver(
+          ([entry]) => {
+            if (!entry.isIntersecting) return;
+            seen.disconnect();
+            playLogo();
+          },
+          { threshold: 0.5 },
+        );
+        seen.observe(logoScreen);
+      } else playLogo();
+      logoScreen.addEventListener('click', playLogo);
+    }
+  }
+
   // 가 방식: 게시물 목록으로 직접 그리는 띠
   const carousel = document.getElementById('reel-carousel');
   const track = document.getElementById('reel-track');
