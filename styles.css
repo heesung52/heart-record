@@ -625,16 +625,20 @@ h1 {
   padding-right: 34%;
 }
 
-.phone:nth-child(2):hover {
+/* 커서를 올리면(PC) 또는 손가락으로 누르면(휴대폰, main.js 가 is-pressed 를 붙인다) 떠오른다 */
+.phone:nth-child(2):hover,
+.phone:nth-child(2).is-pressed {
   transform: translateY(-6px);
 }
 
 /* 양쪽 카드도 기울기와 자리는 그대로 두고 가운데와 같은 만큼 떠오른다 */
-.phone:nth-child(1):hover {
+.phone:nth-child(1):hover,
+.phone:nth-child(1).is-pressed {
   transform: translateX(16%) translateY(-6px) rotate(-7deg);
 }
 
-.phone:nth-child(3):hover {
+.phone:nth-child(3):hover,
+.phone:nth-child(3).is-pressed {
   transform: translateX(-16%) translateY(-6px) rotate(7deg);
 }
 

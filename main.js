@@ -46,9 +46,12 @@
 
   // 재생 창: 게시물 카드를 누르면 인스타그램으로 넘어가지 않고, 인스타그램이 주는 재생 화면(게시물 주소/embed)을 이 페이지 안에 띄운다.
   // 재생 화면은 카드를 누를 때 처음 불러오고 창을 닫으면 없앤다(소리가 멎고, 누르기 전에는 인스타그램에 연결되지 않는다).
+  // 재생 창은 마우스를 쓰는 PC에서만 쓴다. 휴대폰·태블릿에서는 카드를 누르면 전처럼 인스타그램으로 가서 앱이 바로 열린다
+  // (휴대폰에서 재생 창을 쓰면 그 안에서 누른 것이 앱이 아니라 인스타그램 웹페이지로 넘어가 버린다 — 2026-11-22 희성님 휴대폰에서 확인).
   const player = document.getElementById('player');
   const playerBody = document.getElementById('player-body');
-  const canPlayHere = Boolean(player && playerBody && typeof player.showModal === 'function');
+  const mouseDevice = window.matchMedia('(hover: hover) and (pointer: fine)').matches && !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const canPlayHere = Boolean(mouseDevice && player && playerBody && typeof player.showModal === 'function');
   let playerFrame = null;
 
   const openPlayer = (post) => {
@@ -101,6 +104,22 @@
     });
   };
 
+  // 손가락으로 누르면 커서를 올렸을 때처럼 떠오르게 한다. 터치 화면에서는 :hover 가 브라우저마다 다르게 붙어서
+  // (희성님 휴대폰에서는 가운데 카드만 떠올랐다) 누르는 동안과 뗀 직후에 표시를 직접 붙인다.
+  const liftOnTouch = (card) => {
+    let timer = 0;
+    card.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse') return;
+      window.clearTimeout(timer);
+      card.classList.add('is-pressed');
+    });
+    const release = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => card.classList.remove('is-pressed'), 260);
+    };
+    for (const type of ['pointerup', 'pointercancel', 'pointerleave']) card.addEventListener(type, release);
+  };
+
   // 첫 화면의 세로 영상 세 장: 왼쪽·가운데·오른쪽 순서로 놓고 가운데에 가장 최근 게시물을 둔다
   const heroReels = document.getElementById('hero-reels');
   if (heroReels) {
@@ -112,6 +131,7 @@
       card.rel = 'noopener';
       card.setAttribute('aria-label', `영상 보기: ${post.caption || ''}`.trim());
       playOnClick(card, post);
+      liftOnTouch(card);
 
       const blur = el('img', 'phone-blur');
       blur.src = post.image;
