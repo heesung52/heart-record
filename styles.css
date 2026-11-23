@@ -896,6 +896,31 @@ h1 {
   font-size: 0.98rem;
 }
 
+/* 카드 오른쪽 위에 옅게 깔리는 3D 그림(기획=클립보드, 촬영=카메라, 편집=편집 줄).
+   그림은 카드그림/trio3d.html 에서 도구/카드그림_만들기.mjs 로 뽑는다.
+   글을 가리지 않게: 제목 줄 옆(글이 없는 오른쪽 위)에서만 또렷하고,
+   설명 글이 시작되는 높이부터는 거의 비치기만 하다가 사라진다. 왼쪽으로도 옅어진다 */
+.trio-item {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.trio-art {
+  position: absolute;
+  z-index: -1;
+  top: -40px;
+  right: -30px;
+  width: 204px;
+  height: auto;
+  opacity: 0.5;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 48%, rgba(0, 0, 0, 0.16) 66%, transparent 88%), linear-gradient(270deg, #000 55%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(180deg, #000 48%, rgba(0, 0, 0, 0.16) 66%, transparent 88%), linear-gradient(270deg, #000 55%, transparent 100%);
+  mask-composite: intersect;
+}
+
 .scope {
   display: grid;
   margin-top: 28px;
